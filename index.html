@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP Essentials Exam Prep</title>
+<meta name="description" content="Interactive end-semester study guide for EP61201 Entrepreneurship Essentials (IIT Kharagpur): past-paper patterns, worked solutions, calculators and lecture summaries.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="topbar">
+  <button class="menu-btn" id="menuBtn" aria-label="Open menu">☰</button>
+  <a class="brand" href="#/home"><span class="logo">EP</span><span>Essentials · End-Sem Prep</span></a>
+  <div class="top-actions">
+    <input id="search" type="search" placeholder="Search everything…" aria-label="Search">
+    <button id="themeBtn" class="ghost" aria-label="Toggle theme">◐</button>
+  </div>
+</header>
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="nav-group">Start here</div>
+    <a href="#/home">🏠 Exam intel &amp; plan</a>
+    <a href="#/mock">⏱️ Predicted paper (mock)</a>
+    <div class="nav-group">Part A · Practice (self-sufficient)</div>
+    <a href="#/project">📊 Project report <span class="pill hot">30 m</span></a>
+    <a href="#/bep">⚖️ Break-even point <span class="pill hot">1 Q</span></a>
+    <a href="#/funding">💰 Financing &amp; valuation <span class="pill hot">1 Q</span></a>
+    <a href="#/fs">📒 Financial statements <span class="pill">short</span></a>
+    <a href="#/theory">✍️ Theory answer bank</a>
+    <a href="#/tools">🧮 Calculators</a>
+    <a href="#/flash">🃏 Flashcards &amp; formula sheet</a>
+    <div class="nav-group">Part B · Lecture summaries</div>
+    <div id="lectureNav"></div>
+    <div class="nav-foot">Progress is saved in this browser only.</div>
+  </nav>
+  <main id="app" tabindex="-1"></main>
+</div>
+<script src="data/practice.js"></script>
+<script src="data/theory.js"></script>
+<script src="data/summaries.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
