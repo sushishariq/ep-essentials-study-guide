@@ -42,8 +42,35 @@ $('#themeBtn').onclick = () => {
 $('#menuBtn').onclick = () => $('#sidebar').classList.toggle('open');
 $('#lectureNav').innerHTML = L.map(l=>`<a href="#/lec/${l.id}">${l.id.replace('L','L ')} · ${esc(l.title)}</a>`).join('');
 
+/* ---------------- full question text from the papers ---------------- */
+const REFS = {
+  'pr-s25':['S25:Q6'], 'pr-a24':['A24:Q7'], 'pr-s24':['S24:Q7'],
+  'b-s23':['S23:Q9'], 'b-a23':['A23:Q9'], 'b-a24':['A24:Q1'], 'b-s25':['S25:Q4'], 'b-s24a':['S24:Q2ii'], 'b-s24b':['S24:Q3'], 'b-a23b':['A23:Q2'],
+  'f-s25':['S25:Q5'], 'f-a24':['A24:Q6'], 'f-a23':['A23:Q6','A23:Q7'], 'f-s23':['S23:Q5','S23:Q6','S23:Q8'], 'f-s24':['S24:Q1'], 'f-s24b':['S24:Q2i','S24:Q5f'],
+  't-0-0':['S25:Q3b'], 't-0-1':['S23:Q4vii'], 't-0-2':['S24:Q5f'],
+  't-1-0':['A23:Q4','S23:Q2'], 't-1-1':['S24:Q4'], 't-1-2':['S25:Q2'], 't-1-3':['S23:Q7'], 't-1-4':['S23:Q1i'],
+  't-2-0':['A24:Q4'], 't-2-1':['A24:Q5'], 't-2-2':['S23:Q1iii'],
+  't-3-0':['A24:Q2i'], 't-3-1':['S23:Q1ii'], 't-3-2':['S23:Q3'], 't-3-3':['S23:Q4viii'], 't-3-4':['S25:Q1'], 't-3-5':['S24:Q5b'], 't-3-6':['S24:Q5d'], 't-3-7':['S24:Q5e'],
+  't-4-0':['S25:Q3a'], 't-4-1':['S24:Q5a'],
+  't-5-0':['A23:Q3'], 't-5-1':['A23:Q8','A24:Q3','S24:Q5c'], 't-5-2':['A24:Q2ii'],
+  'fs-0':['A23:Q1'], 'pr-a23':['A23:Q5']
+};
+const SOL_HREF = {};   // paper block key -> where its solution lives
+(function(){
+  const page = id => id.startsWith('pr-')?'project':id.startsWith('b-')?'bep':id.startsWith('f-')?'funding':id.startsWith('t-')?'theory':'fs';
+  Object.entries(REFS).forEach(([id,keys])=>keys.forEach(k=>{ (SOL_HREF[k]=SOL_HREF[k]||[]).push(`#/${page(id)}?a=${id}`); }));
+})();
+function fullQ(keys){
+  if(!window.PAPER_BLOCK || !keys) return '';
+  const storyShown = {};
+  return keys.map(k=>{ const r=PAPER_BLOCK(k); if(!r) return '';
+    const st = r.block.story && r.paper.story && !storyShown[r.paper.id] ? (storyShown[r.paper.id]=1, `<details class="storybox"><summary>📖 Read the case story this question is based on — ${esc(r.paper.storyTitle||'story')}</summary><div class="body story">${r.paper.story}</div></details>`) : '';
+    return `<div class="fullq"><div class="fullq-h">📄 Exact question · ${esc(r.paper.title)} (${r.paper.id}) · ${esc(r.block.label)}</div>${st}${r.block.html}</div>`; }).join('');
+}
+
 /* ---------------- generic question block ---------------- */
 function questionBlock(q, opts={}){
+  if (REFS[q.id]) { q = Object.assign({}, q, {text: fullQ(REFS[q.id]), intro:null}); opts = Object.assign({}, opts, {extra:''}); }
   const steps = opts.stepsHtml || (q.steps||[]).map((s,i)=>`<div class="step" data-i="${i}">${s}</div>`).join('');
   const checks = (q.checks||[]).map((c,i)=>`<div class="check"><span>${esc(c[0])}</span><input type="number" step="any" data-ans="${c[1]}" aria-label="${esc(c[0])}"><button class="small" data-chk>Check</button><span class="res"></span></div>`).join('');
   return `<div class="q" id="${q.id}">
@@ -196,8 +223,8 @@ pages.project = () => {
   <p class="muted">Try each on paper first. Each solution unfolds part by part. "Open in calculator" loads the data so you can change numbers.</p>
   ${pj.questions.map(prQuestion).join('')}
   <h2>6 · Theory version (A23 Q5, 20 marks)</h2>
-  <div class="card"><p><b>"Prepare a two-page project report for GreenEco Innovations… highlight all the important headings; you may use imaginary data."</b></p>
-  <p>Use the 8 chapter headings above. Under Financials, invent a small but consistent table: project cost (fixed capital + working capital + contingency), means of finance, 3-year sales and net profit, BEP. Add risks (greenwashing scepticism, competition from FMCG giants, raw-material cost) with mitigations, and the ask (amount, use of funds, expected return).</p></div>`;
+  <div class="card" id="pr-a23">${fullQ(REFS['pr-a23'])}
+  <p><b>How to answer:</b> Use the 8 chapter headings above. Under Financials, invent a small but consistent table: project cost (fixed capital + working capital + contingency), means of finance, 3-year sales and net profit, BEP. Add risks (greenwashing scepticism, competition from FMCG giants, raw-material cost) with mitigations, and the ask (amount, use of funds, expected return).</p></div>`;
 };
 pages.bep = () => {
   const b=P.bep;
@@ -285,10 +312,28 @@ pages.funding = () => {
 };
 pages.fs = () => `<h1>Financial statements — short answers only</h1>
   <p class="lead">Per the notice, no long question from this pre-mid-sem topic. Know these crisply; click a question to reveal.</p>
+  <div class="card" id="fs-0">${fullQ(REFS['fs-0'])}<p class="muted">The first three answers below solve this question (book vs market value, how book value changes, DBC's figures).</p></div>
   ${P.fs.map((x,i)=>`<details><summary>${esc(x.q)}</summary><div class="body"><p>${esc(x.a)}</p></div></details>`).join('')}
   <div class="callout">The full P&amp;L → balance sheet → cash-flow mechanics also feed the project report — see <a href="#/lec/L03">L03 summary</a>.</div>`;
 pages.theory = () => `<h1>Theory answer bank</h1><p class="lead">Every theory question from the last five papers, with a model answer built from the slides. Read the question, draft your bullets, then open the model answer.</p>
-  ${T.map((g,gi)=>`<h2>${esc(g.topic)} <span class="tag ${g.prio==='high'?'y':''}">${g.prio} priority</span></h2>${g.items.map((it,ii)=>`<details id="t-${gi}-${ii}"><summary>${esc(it.q)} <span class="tag">${esc(it.src)}</span></summary><div class="body"><ul>${it.a.map(x=>`<li>${x}</li>`).join('')}</ul>${masteredBox(`t-${gi}-${ii}`)}</div></details>`).join('')}`).join('')}`;
+  ${T.map((g,gi)=>`<h2>${esc(g.topic)} <span class="tag ${g.prio==='high'?'y':''}">${g.prio} priority</span></h2>${g.items.map((it,ii)=>{ const id=`t-${gi}-${ii}`, fq=fullQ(REFS[id]);
+    return `<details id="${id}"><summary>${esc(it.q)} <span class="tag">${esc(it.src)}</span></summary><div class="body">${fq}${fq?`<details class="answer"><summary>✅ Show model answer</summary><div class="body"><ul>${it.a.map(x=>`<li>${x}</li>`).join('')}</ul></div></details>`:`<ul>${it.a.map(x=>`<li>${x}</li>`).join('')}</ul>`}${masteredBox(id)}</div></details>`; }).join('')}`).join('')}`;
+
+/* ---------------- PAST PAPERS (full text) ---------------- */
+pages.papers = () => `<h1>Past papers — full text</h1>
+  <p class="lead">All five end-sem papers, word for word, with every case story and data table. Each question links to its worked solution in this guide.</p>
+  <div class="grid g2">${(window.PAPERS||[]).map(p=>`<a class="card paperlink" href="#/paper/${p.id}"><h4>${esc(p.title)} (${p.id})</h4><p class="muted">${esc(p.header)}</p><p>${p.blocks.length} question blocks${p.story?' · includes case story':''}</p></a>`).join('')}</div>`;
+pages.paper = (qs, id) => {
+  const p=(window.PAPERS||[]).find(x=>x.id===id); if(!p) return '<p>Paper not found.</p>';
+  const i=PAPERS.indexOf(p), prev=PAPERS[i-1], next=PAPERS[i+1];
+  return `<h1>${esc(p.title)} <span class="tag">${p.id}</span></h1>
+  <p class="muted">${esc(p.header)}</p>
+  <div class="card"><b>Instructions</b><ul>${p.instructions.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
+  ${p.story?`<h2>${esc(p.storyTitle||'Story')}</h2><div class="card story">${p.story}</div>`:''}
+  <h2>Questions</h2>
+  ${p.blocks.map(b=>`<div class="fullq paperq"><div class="fullq-h">${esc(b.label)}</div>${b.html}${(SOL_HREF[b.key]||[]).length?`<div class="row" style="margin-top:8px">${SOL_HREF[b.key].map(h=>`<a class="btn small" href="${h}">See solution →</a>`).join('')}</div>`:''}</div>`).join('')}
+  <div class="row" style="justify-content:space-between;margin-top:24px">${prev?`<a class="btn" href="#/paper/${prev.id}">← ${prev.id}</a>`:'<span></span>'}${next?`<a class="btn" href="#/paper/${next.id}">${next.id} →</a>`:''}</div>`;
+};
 
 /* ---------------- TOOLS ---------------- */
 const prFields=[["units","SOM / sales units"],["price","Selling price (₹)"],["rm","Raw materials %"],["power","Power & fuel %"],["maint","Maintenance %"],["pack","Packaging %"],["labour","Direct labour %"],["factory","Factory overhead %"],["selling","Selling & marketing %"],["admin","Admin overhead %"],["other","Other operating %"],["interest","Interest on bank loan (₹)"],["open_fg","Opening stock FG (₹)"],["close_fg","Closing stock FG (₹)"],["land","Land (₹)"],["factory_shed","Factory shed (₹)"],["office","Office building (₹)"],["machinery","Machinery (₹)"],["truck","Truck (₹)"],["utilities","Utilities: electric, drainage (₹)"],["startup","Startup expenses (₹)"],["amort","Amortization (₹, blank = 10%)"],["cash","Cash to maintain (₹)"],["cont_pct","Contingency % of FC+WC"],["cont_abs","Contingency amount (₹, overrides %)"],["equity","Founders' equity (₹)"],["div_pct","Dividend % of equity"],["bank","Long-term bank loan (₹)"],["angel","Angel / investor (₹)"],["suppliers","Suppliers' credit (₹)"]];
@@ -418,8 +463,8 @@ pages.mock = () => {
   <h2>Timed mock (random draw from past papers)</h2>
   <div class="card"><div class="row"><span class="timer" id="timer">60:00</span><button class="primary" id="tStart">Start</button><button id="tPause">Pause</button><button id="tReset">Reset</button><select id="tMin"><option value="60">60 min</option><option value="90">90 min</option><option value="45">45 min</option></select><a class="btn" href="#/mock" onclick="setTimeout(()=>location.reload(),10)">New draw ↻</a></div>
   <ol><li><b>Project report [30]</b> — ${esc(a.src)}. <a href="#/project">solution in Project report → ${esc(a.id)}</a></li>
-  <li><b>Break-even</b> — ${esc(b.src)}: ${b.text}</li>
-  <li><b>Financing</b> — ${esc(c.src)}: ${c.text}</li>
+  <li><b>Break-even</b> — ${esc(b.src)}: ${fullQ(REFS[b.id])||b.text}</li>
+  <li><b>Financing</b> — ${esc(c.src)}: ${fullQ(REFS[c.id])||c.text}</li>
   <li><b>Short answer</b> — ${esc(d.q)}</li></ol>
   <p class="muted">Work on paper. When time is up, compare with the step-by-step solutions on each topic page.</p></div>`;
 };
@@ -456,6 +501,7 @@ function buildIndex(){
   P.project.questions.forEach(q=>idx.push({t:q.src,x:q.intro+' '+(q.note||''),h:'#/project',a:q.id}));
   P.bep.questions.forEach(q=>idx.push({t:q.src,x:strip(q.text+' '+q.steps.join(' ')),h:'#/bep',a:q.id}));
   P.funding.questions.forEach(q=>idx.push({t:q.src,x:strip(q.text+' '+q.steps.join(' ')),h:'#/funding',a:q.id}));
+  (window.PAPERS||[]).forEach(p=>{ p.blocks.forEach(b=>idx.push({t:`${p.id} paper · ${b.label}`,x:strip(b.html),h:'#/paper/'+p.id})); if(p.story) idx.push({t:`${p.id} paper · story`,x:strip(p.story),h:'#/paper/'+p.id}); });
   P.funding.theory.forEach(t=>idx.push({t:'Funding: '+t[0],x:t[1],h:'#/funding'}));
   P.fs.forEach(f=>idx.push({t:'Financial statements: '+f.q,x:f.a,h:'#/fs'}));
   T.forEach((g,gi)=>g.items.forEach((it,ii)=>idx.push({t:it.q,x:strip(it.a.join(' ')),h:'#/theory',a:`t-${gi}-${ii}`})));

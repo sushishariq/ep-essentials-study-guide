@@ -152,3 +152,21 @@ footer.pg{margin-top:40px;color:var(--muted);font-size:.8rem}
   .kv{grid-template-columns:1fr}
 }
 @media print{.topbar,.sidebar{display:none}.layout{display:block}.steps .step{display:block}}
+
+/* ---------- full question text from papers ---------- */
+.fullq{border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:8px;padding:10px 14px;margin:10px 0}
+.fullq + .fullq{margin-top:12px}
+.fullq-h{font-size:.8rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.02em;margin-bottom:6px}
+.fullq p{margin:6px 0}
+.fullq .tablewrap{margin:8px 0}
+table.ptable td,table.ptable th{padding:4px 8px;font-size:.88rem}
+.plist{margin:6px 0 6px 18px;padding-left:12px}
+.plist li{margin:4px 0}
+.story p{margin:8px 0;line-height:1.6}
+.fullq .story{background:var(--surface);border-radius:8px;padding:6px 12px}
+details.storybox{background:var(--surface);margin:6px 0 10px}
+details.answer{border-color:var(--good);margin-top:12px}
+details.answer>summary{color:var(--good)}
+.paperq{background:var(--surface)}
+a.paperlink{display:block;color:inherit;text-decoration:none}
+a.paperlink:hover{border-color:var(--accent)}
